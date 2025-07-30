@@ -1,4 +1,5 @@
 import 'package:audio_spelling/pages/classic_spelling.dart';
+import 'package:audio_spelling/pages/timed_challenge.dart';
 import 'package:audio_spelling/pages/word_search.dart';
 import 'package:flutter/material.dart';
 
@@ -79,7 +80,15 @@ class PlayPage extends StatelessWidget {
                           'Timed Challenge',
                           Icons.timer_outlined,
                           const Color.fromARGB(255, 19, 184, 0),
-                          () {},
+                          () {
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const TimedSpellingChallenge(),
+                              ),
+                            );
+                          },
                         ),
                         _buildGameModeButton(
                           context,
