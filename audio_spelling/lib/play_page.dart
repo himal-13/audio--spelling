@@ -1,5 +1,5 @@
+import 'package:audio_spelling/pages/classic_spelling.dart';
 import 'package:flutter/material.dart';
-
 
 class PlayPage extends StatelessWidget {
   const PlayPage({super.key});
@@ -48,24 +48,36 @@ class PlayPage extends StatelessWidget {
                           'Classic Spelling',
                           Icons.school_outlined,
                           const Color(0xFFFF9F40),
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ClassicalSpellingGame(),
+                              ),
+                            );
+                          },
                         ),
                         _buildGameModeButton(
                           context,
                           'Word Search',
                           Icons.search,
                           const Color(0xFF4AC2D6),
+                          () {},
                         ),
                         _buildGameModeButton(
                           context,
                           'Timed Challenge',
                           Icons.timer_outlined,
                           const Color.fromARGB(255, 19, 184, 0),
+                          () {},
                         ),
                         _buildGameModeButton(
                           context,
                           'Story Mode',
                           Icons.menu_book,
                           const Color.fromARGB(255, 89, 0, 158),
+                          () {},
                         ),
                       ],
                     ),
@@ -116,9 +128,11 @@ class PlayPage extends StatelessWidget {
     String title,
     IconData icon,
     Color color,
+    final VoidCallback onTap,
   ) {
     return InkWell(
       onTap: () {
+        onTap();
         // Handle game mode selection
         // For example: Navigator.push(context, MaterialPageRoute(builder: (_) => GameModeScreen(title)));
       },
