@@ -1,4 +1,5 @@
 import 'package:audio_spelling/pages/classic_spelling.dart';
+import 'package:audio_spelling/pages/word_search.dart';
 import 'package:flutter/material.dart';
 
 class PlayPage extends StatelessWidget {
@@ -63,7 +64,15 @@ class PlayPage extends StatelessWidget {
                           'Word Search',
                           Icons.search,
                           const Color(0xFF4AC2D6),
-                          () {},
+                          () {
+                               Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const WordSearchGame(),
+                              ),
+                            );
+                          },
                         ),
                         _buildGameModeButton(
                           context,
