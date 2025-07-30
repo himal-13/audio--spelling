@@ -1,4 +1,5 @@
 import 'package:audio_spelling/pages/classic_spelling.dart';
+import 'package:audio_spelling/pages/story_mode.dart';
 import 'package:audio_spelling/pages/timed_challenge.dart';
 import 'package:audio_spelling/pages/word_search.dart';
 import 'package:flutter/material.dart';
@@ -95,7 +96,15 @@ class PlayPage extends StatelessWidget {
                           'Story Mode',
                           Icons.menu_book,
                           const Color.fromARGB(255, 89, 0, 158),
-                          () {},
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const StoryModeGame(),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
