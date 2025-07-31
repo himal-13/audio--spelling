@@ -230,6 +230,12 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
   }
 
   // Saves progress to SharedPreferences
+  void _saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Convert the Set of completed levels to a List of Strings to save
+    final completedLevelsList = _completedLevels.map((level) => level.toString()).toList();
+    await prefs.setStringList('classicalCompletedLevels', completedLevelsList);
+  }
 
   // Function to start a level
   void _startLevel(int levelNumber) {
@@ -339,6 +345,13 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
     final currentLevelWords = GameLevel.allLevels[_selectedLevel! - 1].words;
     // Check if the number of unique words in _completedCorrectWordsSet matches the total words for the level
     if (_completedCorrectWordsSet.length == currentLevelWords.length) {
+      // If a level is completed, we should save the progress.
+      // We will now add the completed level to the set and save it.
+      if (!_completedLevels.contains(_selectedLevel!)) {
+        _completedLevels.add(_selectedLevel!);
+        _saveProgress(); // Call the new save function here
+      }
+      
       Future.delayed(const Duration(seconds: 1), () {
         _showCompletionDialog();
       });
@@ -465,6 +478,12 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
 
   // Shows a dialog when the level is completed
   void _showCompletionDialog() {
+    // Add the completed level to the set and save it before the dialog appears
+    if (!_completedLevels.contains(_selectedLevel!)) {
+      _completedLevels.add(_selectedLevel!);
+      _saveProgress(); // Ensure progress is saved
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -633,33 +652,7 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribute space
       children: [
         // Top section: Display current level
-        Padding(
-          padding: const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            decoration: BoxDecoration(
-              color: const Color(0xFFD4C7B7), // Light beige from UI image
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: const Color(0xFF8D7C6A), width: 2), // Darker beige border
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Text(
-              'LEVEL $_selectedLevel', // Re-added the level box
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF8B5A2B), // Dark brown text
-              ),
-            ),
-          ),
-        ),
+        
 
         // Display for the words being formed by the user (target boxes)
         Expanded(
