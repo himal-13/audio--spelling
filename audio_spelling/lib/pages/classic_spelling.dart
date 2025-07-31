@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:shared_preferences/shared_preferences.dart'; // Uncommented for real persistence
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Define a data structure for a word in the game
 class GameWord {
   final String correctWord;
-  final String scrambledWord;
+  final String scrambledWord; // Scrambled version of this specific word
   final String definition; // Added definition
 
   GameWord(this.correctWord, this.definition) : scrambledWord = _scrambleWord(correctWord);
@@ -22,52 +22,157 @@ class GameWord {
 class GameLevel {
   final int levelNumber;
   final List<GameWord> words;
+  final List<String> commonLetterPool; // New: Pool of letters for all words in this level
 
-  GameLevel({required this.levelNumber, required this.words});
+  GameLevel({required this.levelNumber, required this.words, required this.commonLetterPool});
 
-  // Example levels with definitions
-  static List<GameLevel> get allLevels => [
-        GameLevel(
-          levelNumber: 1,
-          words: [
-            GameWord('CAT', 'A small domesticated carnivorous mammal.'),
-            GameWord('DOG', 'A domesticated carnivorous mammal that typically has a long snout.'),
-            GameWord('SUN', 'The star that the Earth orbits.'),
-            GameWord('RUN', 'Move at a speed faster than a walk.'),
-            GameWord('JUMP', 'Push oneself off a surface into the air.'),
-          ],
-        ),
-        GameLevel(
-          levelNumber: 2,
-          words: [
-            GameWord('APPLE', 'A round fruit with crisp flesh and a green, red, or yellow skin.'),
-            GameWord('HOUSE', 'A building for human habitation.'),
-            GameWord('TABLE', 'A piece of furniture with a flat top and one or more legs.'),
-            GameWord('CHAIR', 'A separate seat for one person, typically with a back and four legs.'),
-            GameWord('WATER', 'A colorless, transparent, odorless liquid that forms the seas, lakes, rivers, and rain.'),
-          ],
-        ),
-        GameLevel(
-          levelNumber: 3,
-          words: [
-            GameWord('ELEPHANT', 'A very large plant-eating mammal with a prehensile trunk.'),
-            GameWord('COMPUTER', 'An electronic device for storing and processing data.'),
-            GameWord('KEYBOARD', 'A panel of keys that operate a computer or typewriter.'),
-            GameWord('MOUNTAIN', 'A large natural elevation of the earth\'s surface.'),
-            GameWord('OCEAN', 'A very large expanse of sea.'),
-          ],
-        ),
-        GameLevel(
-          levelNumber: 4,
-          words: [
-            GameWord('PROGRAMMING', 'The process of writing computer programs.'),
-            GameWord('DEVELOPMENT', 'The process of developing or being developed.'),
-            GameWord('APPLICATION', 'A formal request to an authority for something.'),
-            GameWord('INTELLIGENCE', 'The ability to acquire and apply knowledge and skills.'),
-            GameWord('ENGINEERING', 'The branch of science and technology concerned with the design, building, and use of engines, machines, and structures.'),
-          ],
-        ),
-      ];
+  // Example levels with definitions and common letter pools
+  static List<GameLevel> get allLevels {
+    // Helper to create a common letter pool from a list of words
+    List<String> _createCommonPool(List<GameWord> words) {
+      String allChars = '';
+      for (var word in words) {
+        allChars += word.correctWord;
+      }
+      List<String> chars = allChars.split('');
+      chars.shuffle(Random());
+      return chars;
+    }
+
+    return [
+     GameLevel(
+        levelNumber: 1,
+        words: [
+          GameWord('AT', 'Used to indicate a place or position.'),
+          GameWord('IS', 'The third person singular present of be.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('AT', ''),
+          GameWord('IS', ''),
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 2,
+        words: [
+          GameWord('GO', 'Move from one place to another.'),
+          GameWord('NO', 'Not any; not one.'),
+          GameWord('UP', 'Towards a higher place or position.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('GO', ''), GameWord('NO', ''),
+          GameWord('UP', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 3,
+        words: [
+          GameWord('CAT', 'A small domesticated carnivorous mammal.'),
+          GameWord('SUN', 'The star around which the earth orbits.'),
+          GameWord('RUN', 'Move at a speed faster than walking.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('CAT', ''),  GameWord('SUN', ''),
+          GameWord('RUN', ''),
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 4,
+        words: [
+          GameWord('CAR', 'A road vehicle, typically with four wheels.'),
+          GameWord('HAT', 'A shaped covering for the head.'),
+          GameWord('BED', 'A piece of furniture for sleeping on.'),
+          GameWord('DAY', 'A period of 24 hours.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('CAR', ''), GameWord('HAT', ''), GameWord('BED', ''),
+          GameWord('DAY', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 5,
+        words: [
+          GameWord('BLUE', 'The color of the sky and sea.'),
+          GameWord('BOOK', 'A written or printed work.'),
+          GameWord('GAME', 'An activity engaged in for diversion or amusement.'),
+          GameWord('TREE', 'A woody perennial plant.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('BLUE', ''), GameWord('BOOK', ''),
+          GameWord('GAME', ''), GameWord('TREE', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 6,
+        words: [
+          GameWord('FISH', 'A limbless cold-blooded vertebrate animal with gills.'),
+          GameWord('SING', 'Make musical sounds with the voice.'),
+          GameWord('CODE', 'A system of words, letters, figures, or symbols.'),
+          GameWord('FAST', 'Moving or capable of moving at high speed.'),
+          GameWord('SLOW', 'Moving or operating, or designed to do so, at a low speed.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('FISH', ''), GameWord('SING', ''), GameWord('CODE', ''),
+          GameWord('FAST', ''), GameWord('SLOW', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 7,
+        words: [
+          GameWord('TRAIL', 'A path or track made across a wild region.'),
+          GameWord('LIGHT', 'The natural agent that stimulates sight and makes things visible.'),
+          GameWord('DREAM', 'A series of thoughts, images, and sensations occurring in a person\'s mind during sleep.'),
+          GameWord('PLANT', 'A living organism of the kind exemplified by trees, shrubs, herbs, grasses, ferns, and mosses.'),
+          GameWord('HAPPY', 'Feeling or showing pleasure or contentment.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('TRAIL', ''), GameWord('LIGHT', ''), GameWord('DREAM', ''),
+          GameWord('PLANT', ''), GameWord('HAPPY', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 8,
+        words: [
+          GameWord('APPLE', 'A round fruit with crisp flesh and a green, red, or yellow skin.'),
+          GameWord('HOUSE', 'A building for human habitation.'),
+          GameWord('TABLE', 'A piece of furniture with a flat top and one or more legs.'),
+          GameWord('CHAIR', 'A separate seat for one person, typically with a back and four legs.'),
+          GameWord('WATER', 'A colorless, transparent, odorless liquid that forms the seas, lakes, rivers, and rain.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('APPLE', ''), GameWord('HOUSE', ''), GameWord('TABLE', ''),
+          GameWord('CHAIR', ''), GameWord('WATER', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 9,
+        words: [
+          GameWord('JOURNEY', 'An act of traveling from one place to another.'),
+          GameWord('MYSTERY', 'Something that is difficult or impossible to understand or explain.'),
+          GameWord('EXPLORE', 'Travel in or through (an unfamiliar country or area) in order to learn about it.'),
+          GameWord('CAPTURE', 'Take into one\'s possession or control by force.'),
+          GameWord('FREEDOM', 'The power or right to act, speak, or think as one wants without hindrance or restraint.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('JOURNEY', ''), GameWord('MYSTERY', ''), GameWord('EXPLORE', ''),
+          GameWord('CAPTURE', ''), GameWord('FREEDOM', '')
+        ]),
+      ),
+      GameLevel(
+        levelNumber: 10,
+        words: [
+          GameWord('ADVENTURE', 'An unusual and exciting or daring experience.'),
+          GameWord('TECHNOLOGY', 'The application of scientific knowledge for practical purposes.'),
+          GameWord('COMMUNITY', 'A group of people living in the same place or having a particular characteristic in common.'),
+          GameWord('DISCOVERY', 'The action or process of discovering or being discovered.'),
+          GameWord('CHALLENGE', 'A call to someone to participate in a competitive situation or fight to decide who is superior in terms of ability or strength.'),
+        ],
+        commonLetterPool: _createCommonPool([
+          GameWord('ADVENTURE', ''), GameWord('TECHNOLOGY', ''), GameWord('COMMUNITY', ''),
+          GameWord('DISCOVERY', ''), GameWord('CHALLENGE', '')
+        ]),
+      ),
+    ];
+  }
 }
 
 class ClassicalSpellingGame extends StatefulWidget {
@@ -79,16 +184,22 @@ class ClassicalSpellingGame extends StatefulWidget {
 
 class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
   int? _selectedLevel;
-  int _currentWordIndex = 0;
-  List<String> _currentAttempt = [];
-  bool _isCorrect = false;
-  bool _showFeedback = false;
-  int _hintsUsed = 0; // Track hints used per word
-  final int _maxHints = 1; // Maximum hints allowed per word
-  List<String> _availableScrambledChars = []; // Tracks available letters to drag
+  // State for multiple words in a level
+  List<List<String>> _currentAttempts = []; // List of attempts for each word
+  List<GameWord?> _matchedWords = []; // Tracks which GameWord has been matched by each _currentAttempts row
+  Set<String> _completedCorrectWordsSet = {}; // Stores the *correct word strings* that have been successfully formed
 
-  // Set to store completed levels
+  List<String> _availableScrambledChars = []; // Common pool of letters for the level
+
+  bool _showFeedback = false; // General feedback for last action
+  bool _isLastActionCorrect = false; // Whether the last check was correct
+
+  int _hintsUsedOverall = 0; // Track total hints used per level
+  final int _maxHintsPerLevel = 3; // Maximum hints allowed per level
+
+  // Set to store completed levels (using levelNumber, not index)
   Set<int> _completedLevels = {};
+  int _maxUnlockedLevel = 1; // Tracks the highest level number unlocked
 
   @override
   void initState() {
@@ -101,13 +212,19 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       // Retrieve the list of completed levels, default to empty list if not found
-      _completedLevels = (prefs.getStringList('completedLevels') ?? [])
+      _completedLevels = (prefs.getStringList('classicalCompletedLevels') ?? [])
           .map(int.parse) // Convert string back to int
           .toSet(); // Convert list to set
 
-      // Ensure level 1 is always accessible if no levels are marked completed
+      // Determine the max unlocked level
       if (_completedLevels.isEmpty) {
-        _completedLevels.add(0); // Add a dummy "level 0" to unlock level 1
+        _maxUnlockedLevel = 1; // Start with Level 1 unlocked
+      } else {
+        _maxUnlockedLevel = (_completedLevels.reduce(max) + 1); // Max completed + 1
+        // Ensure _maxUnlockedLevel does not exceed total levels + 1
+        if (_maxUnlockedLevel > GameLevel.allLevels.length + 1) {
+          _maxUnlockedLevel = GameLevel.allLevels.length + 1;
+        }
       }
     });
   }
@@ -117,129 +234,222 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
     final prefs = await SharedPreferences.getInstance();
     // Convert the set of completed levels to a list of strings for storage
     await prefs.setStringList(
-        'completedLevels', _completedLevels.map((e) => e.toString()).toList());
+        'classicalCompletedLevels', _completedLevels.map((e) => e.toString()).toList());
+    await prefs.setInt('classicalMaxUnlockedLevel', _maxUnlockedLevel);
   }
 
   // Function to start a level
   void _startLevel(int levelNumber) {
     setState(() {
       _selectedLevel = levelNumber;
-      _currentWordIndex = 0;
-      _resetAttempt();
-      _hintsUsed = 0; // Reset hints when starting a new word
+      _resetLevel(); // Reset all words and available chars for the new level
     });
   }
 
-  // Resets the current attempt for a new word
-  void _resetAttempt() {
-    setState(() {
-      final currentWord = GameLevel.allLevels[_selectedLevel! - 1].words[_currentWordIndex];
-      _currentAttempt = List.filled(currentWord.correctWord.length, '');
-      _availableScrambledChars = currentWord.scrambledWord.split(''); // Reset available chars
-      _isCorrect = false;
-      _showFeedback = false;
-      _hintsUsed = 0; // Reset hints when resetting a word
-    });
+  // Resets the entire current level's state
+  void _resetLevel() {
+    if (_selectedLevel == null) return; // Should not happen if called correctly
+
+    final currentLevelData = GameLevel.allLevels[_selectedLevel! - 1];
+    _currentAttempts = List.generate(
+      currentLevelData.words.length, // Number of rows will be equal to number of words in level
+      (wordIndex) => List.filled(currentLevelData.words[wordIndex].correctWord.length, ''), // Each row length matches its target word
+    );
+    _matchedWords = List.filled(currentLevelData.words.length, null); // Initialize all rows as unmatched
+    _completedCorrectWordsSet = {}; // Clear the set of completed words
+    _availableScrambledChars = List.from(currentLevelData.commonLetterPool);
+    _availableScrambledChars.shuffle(Random()); // Shuffle the common pool
+    _hintsUsedOverall = 0; // Reset hints for the new level
+    _showFeedback = false;
+    _isLastActionCorrect = false;
   }
 
-  // Handles a letter being placed in the attempt
-  void _onLetterPlaced(String letter, int index) {
+  // Handles a letter being placed in a specific word's slot
+  void _onLetterPlaced(String letter, int wordIndex, int letterIndex) {
     setState(() {
+      // If this row was previously matched, unmatch it first
+      if (_matchedWords[wordIndex] != null) {
+        _completedCorrectWordsSet.remove(_matchedWords[wordIndex]!.correctWord);
+        _matchedWords[wordIndex] = null;
+      }
+
       // If there was already a letter in this slot, return it to the available pool
-      if (_currentAttempt[index].isNotEmpty) {
-        _availableScrambledChars.add(_currentAttempt[index]);
+      if (_currentAttempts[wordIndex][letterIndex].isNotEmpty) {
+        _availableScrambledChars.add(_currentAttempts[wordIndex][letterIndex]);
       }
 
-      _currentAttempt[index] = letter;
-      // Only remove if the letter was actually from the available pool.
-      // This prevents issues if a letter is dropped onto itself.
-      final int removedIndex = _availableScrambledChars.indexOf(letter);
-      if (removedIndex != -1) {
-        _availableScrambledChars.removeAt(removedIndex);
+      _currentAttempts[wordIndex][letterIndex] = letter;
+      _availableScrambledChars.remove(letter);
+
+      // Only attempt to match if the row is now full
+      if (_currentAttempts[wordIndex].every((char) => char.isNotEmpty)) {
+        _attemptToMatchWord(wordIndex);
+      } else {
+        _showFeedback = false; // Clear feedback if not full
       }
-      _checkWord();
+      _checkLevelCompletion(); // Always check level completion after any change
     });
   }
 
-  // Checks if the current attempt matches the correct word
-  void _checkWord() {
-    if (_currentAttempt.every((char) => char.isNotEmpty)) {
-      final currentWord = GameLevel.allLevels[_selectedLevel! - 1].words[_currentWordIndex];
-      final attemptedWord = _currentAttempt.join();
+  // Handles a letter being tapped in a specific word's slot (to return it)
+  void _onLetterReturned(int wordIndex, int letterIndex) {
+    setState(() {
+      final letterToReturn = _currentAttempts[wordIndex][letterIndex];
+      if (letterToReturn.isNotEmpty) {
+        _availableScrambledChars.add(letterToReturn);
+        _availableScrambledChars.sort(); // Keep sorted for consistent display (optional)
+
+        _currentAttempts[wordIndex][letterIndex] = '';
+
+        // If this row was previously matched, unmatch it
+        if (_matchedWords[wordIndex] != null) {
+          _completedCorrectWordsSet.remove(_matchedWords[wordIndex]!.correctWord);
+          _matchedWords[wordIndex] = null;
+          _showFeedback = false; // Clear feedback
+        }
+      }
+    });
+  }
+
+  // Attempts to match the word formed in a specific attempt row
+  void _attemptToMatchWord(int wordIndex) {
+    final attemptedWord = _currentAttempts[wordIndex].join();
+    final currentLevelWords = GameLevel.allLevels[_selectedLevel! - 1].words;
+
+    bool foundMatch = false;
+    for (var correctGameWord in currentLevelWords) {
+      // Check if this correct word has already been found by ANY row
+      if (!_completedCorrectWordsSet.contains(correctGameWord.correctWord)) {
+        if (attemptedWord == correctGameWord.correctWord) {
+          setState(() {
+            _matchedWords[wordIndex] = correctGameWord; // Mark this row as matching this specific correct word
+            _completedCorrectWordsSet.add(correctGameWord.correctWord); // Add to the set of found words
+            _isLastActionCorrect = true;
+            _showFeedback = true;
+          });
+          foundMatch = true;
+          break; // Found a match for this attempted word, stop checking other correct words
+        }
+      }
+    }
+
+    if (!foundMatch) {
       setState(() {
-        _isCorrect = (attemptedWord == currentWord.correctWord);
+        _isLastActionCorrect = false;
         _showFeedback = true;
       });
-
-      if (_isCorrect) {
-        Future.delayed(const Duration(seconds: 1), () {
-          _moveToNextWord();
-        });
-      }
     }
   }
 
-  // Moves to the next word or finishes the level
-  void _moveToNextWord() {
+  // Checks if all words in the current level are completed
+  void _checkLevelCompletion() {
     final currentLevelWords = GameLevel.allLevels[_selectedLevel! - 1].words;
-    if (_currentWordIndex < currentLevelWords.length - 1) {
-      setState(() {
-        _currentWordIndex++;
-        _resetAttempt();
+    // Check if the number of unique words in _completedCorrectWordsSet matches the total words for the level
+    if (_completedCorrectWordsSet.length == currentLevelWords.length) {
+      Future.delayed(const Duration(seconds: 1), () {
+        _showCompletionDialog();
       });
-    } else {
-      // Level completed
-      _completedLevels.add(_selectedLevel!); // Mark current level as completed
-      _saveProgress(); // Save progress
-      _showCompletionDialog();
     }
   }
 
   // Provides a hint to the user
   void _getHint() {
-    if (_hintsUsed < _maxHints) { // Limit to _maxHints hints per word
-      final currentWord = GameLevel.allLevels[_selectedLevel! - 1].words[_currentWordIndex];
-      final correctChars = currentWord.correctWord.split('');
+    if (_hintsUsedOverall >= _maxHintsPerLevel) {
+      _showMessageDialog('Hint Limit Reached', 'You have used all $_maxHintsPerLevel hints for this level.');
+      return;
+    }
 
-      // Find an empty slot that can be filled with a correct letter
-      for (int i = 0; i < correctChars.length; i++) {
-        if (_currentAttempt[i].isEmpty) {
-          setState(() {
-            _currentAttempt[i] = correctChars[i];
-            // Remove the hinted letter from available scrambled chars if it was there
-            // Use removeAt or removeWhere if there are duplicate letters and you need to remove a specific instance
-            final int removedIndex = _availableScrambledChars.indexOf(correctChars[i]);
-            if (removedIndex != -1) {
-              _availableScrambledChars.removeAt(removedIndex);
-            }
-            _hintsUsed++;
-            _checkWord(); // Check word after hint
-          });
-          return; // Only provide one hint at a time
+    final currentLevelWords = GameLevel.allLevels[_selectedLevel! - 1].words;
+
+    // 1. Find an un-matched correct word
+    GameWord? correctWordToHint;
+    for (var gw in currentLevelWords) {
+      if (!_completedCorrectWordsSet.contains(gw.correctWord)) {
+        correctWordToHint = gw;
+        break;
+      }
+    }
+
+    if (correctWordToHint == null) {
+      _showMessageDialog('All Words Completed', 'All words in this level are already completed!');
+      return;
+    }
+
+    // 2. Find an available, unmatched attempt row to place the hint
+    int targetAttemptRowIndex = -1;
+    for (int i = 0; i < _currentAttempts.length; i++) {
+      if (_matchedWords[i] == null) { // This row is not yet matched
+        // Prioritize a row that has the correct length for the word we want to hint
+        if (_currentAttempts[i].length == correctWordToHint.correctWord.length) {
+          targetAttemptRowIndex = i;
+          break;
         }
       }
+    }
+
+    // If no row of the correct length is found, just pick the first unmatched row
+    if (targetAttemptRowIndex == -1) {
+      for (int i = 0; i < _currentAttempts.length; i++) {
+        if (_matchedWords[i] == null) {
+          targetAttemptRowIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (targetAttemptRowIndex == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No empty or unmatched word rows available for a hint.'), duration: Duration(seconds: 2)),
+      );
+      return;
+    }
+
+    final currentAttemptRow = _currentAttempts[targetAttemptRowIndex];
+    final correctChars = correctWordToHint.correctWord.split('');
+
+    // Find the first empty slot in the target attempt row
+    int hintLetterIndex = -1;
+    for (int i = 0; i < correctChars.length; i++) {
+      if (i < currentAttemptRow.length && currentAttemptRow[i].isEmpty) {
+        hintLetterIndex = i;
+        break;
+      }
+    }
+
+    if (hintLetterIndex != -1) {
+      final correctLetter = correctChars[hintLetterIndex];
+      setState(() {
+        // If there's an existing letter in the slot, return it to the available pool (should be empty if we're picking an empty slot)
+        if (_currentAttempts[targetAttemptRowIndex][hintLetterIndex].isNotEmpty) {
+          _availableScrambledChars.add(_currentAttempts[targetAttemptRowIndex][hintLetterIndex]);
+        }
+
+        // Remove the correct letter from the available pool
+        _availableScrambledChars.remove(correctLetter);
+
+        _currentAttempts[targetAttemptRowIndex][hintLetterIndex] = correctLetter;
+        _hintsUsedOverall++;
+
+        // After placing hint, if the word becomes complete, try to match it
+        if (_currentAttempts[targetAttemptRowIndex].every((char) => char.isNotEmpty)) {
+          _attemptToMatchWord(targetAttemptRowIndex);
+        }
+        _checkLevelCompletion(); // Check overall level completion
+      });
     } else {
-      _showMessageDialog('Hint Limit Reached', 'You have used all $_maxHints hints for this word.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('The selected word row is full. Try clearing it first.'), duration: Duration(seconds: 2)),
+      );
     }
   }
 
-  // Fills the boxes with the correct word
-  void _solveWord() {
-    setState(() {
-      final currentWord = GameLevel.allLevels[_selectedLevel! - 1].words[_currentWordIndex];
-      _currentAttempt = currentWord.correctWord.split('');
-      _availableScrambledChars.clear(); // Clear all scrambled letters
-      _isCorrect = true;
-      _showFeedback = true;
-    });
-    Future.delayed(const Duration(seconds: 1), () {
-      _moveToNextWord();
-    });
+  // Resets all words in the current level
+  void _resetAllWords() {
+    _resetLevel();
+    setState(() {}); // Trigger rebuild
   }
 
-
-
-  // Shows a generic message dialog
+  // Shows a generic message dialog (for hint limit, etc.)
   void _showMessageDialog(String title, String message) {
     showDialog(
       context: context,
@@ -268,9 +478,9 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: Colors.white,
-          title: const Text('Level Completed!', style: TextStyle(color: Color(0xFF5B6DF0), fontWeight: FontWeight.bold)),
-          content: Text('Congratulations! You finished Level $_selectedLevel.', style: const TextStyle(color: Colors.black87)),
+          backgroundColor: const Color(0xFFF5E6CC), // Match UI image background
+          title: const Text('Level Completed!', style: TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold)), // Match UI image text color
+          content: Text('Congratulations! You finished Level $_selectedLevel.', style: const TextStyle(color: Color(0xFF8B5A2B))), // Match UI image text color
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -279,7 +489,7 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
                   _selectedLevel = null; // Go back to level selection
                 });
               },
-              child: const Text('Back to Levels', style: TextStyle(color: Color(0xFF5B6DF0), fontWeight: FontWeight.bold)),
+              child: const Text('Back to Levels', style: TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold)),
             ),
             if (_selectedLevel! < GameLevel.allLevels.length)
               TextButton(
@@ -287,7 +497,7 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
                   Navigator.of(context).pop(); // Close dialog
                   _startLevel(_selectedLevel! + 1); // Start next level
                 },
-                child: const Text('Next Level', style: TextStyle(color: Color(0xFFFF9F40), fontWeight: FontWeight.bold)),
+                child: const Text('Next Level', style: TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold)),
               ),
           ],
         );
@@ -298,14 +508,17 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5E6CC), // Overall background color from UI image
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5B6DF0),
+        backgroundColor: const Color(0xFFF5E6CC), // AppBar background color from UI image
+        elevation: 0, // No shadow
         title: Text(
           _selectedLevel == null ? 'Select Level' : 'Level $_selectedLevel',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold, fontSize: 24), // Match UI image text color and size
         ),
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF8B5A2B)), // Match UI image icon color
           onPressed: () {
             if (_selectedLevel != null) {
               setState(() {
@@ -317,19 +530,10 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
           },
         ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF5B6DF0), Color(0xFF4AC2D6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: _selectedLevel == null
-              ? _buildLevelSelection()
-              : _buildGamePlay(),
-        ),
+      body: SafeArea(
+        child: _selectedLevel == null
+            ? _buildLevelSelection()
+            : _buildGamePlay(),
       ),
     );
   }
@@ -338,18 +542,7 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
   Widget _buildLevelSelection() {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Text(
-            'Choose Your Challenge',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
+       
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -362,9 +555,8 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
             itemCount: GameLevel.allLevels.length,
             itemBuilder: (context, index) {
               final level = GameLevel.allLevels[index];
-              // Check if the previous level is completed to unlock this level
-              // Level 1 is unlocked if level 0 is in _completedLevels (which is added by default)
-              final bool isLocked = !_completedLevels.contains(level.levelNumber - 1);
+              // Check if the level is locked based on _maxUnlockedLevel
+              final bool isLocked = level.levelNumber > _maxUnlockedLevel;
               final bool isCompleted = _completedLevels.contains(level.levelNumber);
 
               return _buildLevelButton(level.levelNumber, isLocked, isCompleted);
@@ -382,8 +574,8 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
       child: Container(
         decoration: BoxDecoration(
           color: isLocked
-              ? Colors.grey.withOpacity(0.6)
-              : (isCompleted ? Colors.green.withOpacity(0.9) : Colors.white.withOpacity(0.9)),
+              ? const Color(0xFFD4C7B7).withOpacity(0.6) // Lighter greyish-brown for locked
+              : (isCompleted ? const Color(0xFF8B5A2B) : const Color(0xFFFDF0D5)), // Dark brown for completed, light yellow for unlocked
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -395,8 +587,8 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
           ],
           border: Border.all(
             color: isLocked
-                ? Colors.grey.shade700
-                : (isCompleted ? Colors.green.shade700 : const Color(0xFFFF9F40)),
+                ? const Color(0xFF8D7C6A) // Darker border for locked
+                : (isCompleted ? const Color(0xFF5A3B1F) : const Color(0xFFD4C7B7)), // Darker brown for completed, light brown for unlocked
             width: 3,
           ),
         ),
@@ -404,15 +596,15 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isLocked ? Icons.lock : (isCompleted ? Icons.check_circle : Icons.star),
+              isLocked ? Icons.lock : (isCompleted ? Icons.check_circle : Icons.play_arrow), // Play icon for unlocked, check for completed
               size: 48,
-              color: isLocked ? Colors.white : (isCompleted ? Colors.white : const Color(0xFFFF9F40)),
+              color: isLocked ? const Color(0xFF8D7C6A) : (isCompleted ? Colors.white : const Color(0xFF8B5A2B)), // Icon color
             ),
             const SizedBox(height: 12),
             Text(
               'Level $levelNumber',
               style: TextStyle(
-                color: isLocked ? Colors.white : (isCompleted ? Colors.white : const Color(0xFF5B6DF0)),
+                color: isLocked ? const Color(0xFF8D7C6A) : (isCompleted ? Colors.white : const Color(0xFF8B5A2B)), // Text color
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -437,204 +629,26 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
 
   // Builds the main game play screen
   Widget _buildGamePlay() {
-    // Defensive checks for _selectedLevel and _currentWordIndex
+    // Defensive checks for _selectedLevel
     if (_selectedLevel == null || _selectedLevel! - 1 < 0 || _selectedLevel! - 1 >= GameLevel.allLevels.length) {
-      return const Center(child: Text("Error: Invalid level selected.", style: TextStyle(color: Colors.white)));
+      return const Center(child: Text("Error: Invalid level selected.", style: TextStyle(color: Colors.black87)));
     }
 
-    final currentLevel = GameLevel.allLevels[_selectedLevel! - 1];
-
-    if (_currentWordIndex < 0 || _currentWordIndex >= currentLevel.words.length) {
-      return const Center(child: Text("Error: Invalid word index.", style: TextStyle(color: Colors.white)));
-    }
-
-    final currentGameWord = currentLevel.words[_currentWordIndex];
-    final totalWordsInLevel = currentLevel.words.length;
-    final progress = (_currentWordIndex + 1) / totalWordsInLevel; // Calculate progress
+    final currentLevelData = GameLevel.allLevels[_selectedLevel! - 1];
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribute space
       children: [
+        // Top section: Display current level
         Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Unscramble the word:',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10), // Reduced spacing
-        // Level Progress Indicator
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            children: [
-              LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.white.withOpacity(0.3),
-                color: const Color(0xFFFF9F40), // Orange accent for progress
-                minHeight: 10,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Word ${_currentWordIndex + 1} of $totalWordsInLevel',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 30), // Adjusted spacing
-        // Display for the word being formed by the user
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: _showFeedback
-                  ? (_isCorrect ? Colors.greenAccent : Colors.redAccent)
-                  : Colors.white.withOpacity(0.5),
-              width: 3,
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Calculate a flexible box size based on available width and number of letters
-              // Ensure minimum size and prevent too large boxes
-              final double availableWidth = constraints.maxWidth - (currentGameWord.correctWord.length * 8); // Account for horizontal margins
-              final double idealBoxWidth = availableWidth / currentGameWord.correctWord.length;
-              final double boxSize = max(35.0, min(60.0, idealBoxWidth)); // Adjusted min/max for better appearance
-
-              return Wrap( // Changed from Row to Wrap for multi-line support
-                alignment: WrapAlignment.center,
-                spacing: 8.0, // Spacing between boxes
-                runSpacing: 8.0, // Spacing between lines
-                children: List.generate(currentGameWord.correctWord.length, (index) {
-                  return DragTarget<String>(
-                    onWillAcceptWithDetails: (data) => true,
-                    onAcceptWithDetails: (data) {
-                      _onLetterPlaced(data.data, index);
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      return Container(
-                        width: boxSize,
-                        height: boxSize + 10, // Slightly taller for better look
-                        decoration: BoxDecoration(
-                          color: _currentAttempt[index].isNotEmpty
-                              ? Colors.white.withOpacity(0.9)
-                              : Colors.white.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.7),
-                            width: 2,
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          _currentAttempt[index],
-                          style: TextStyle(
-                            fontSize: boxSize * 0.6, // Responsive font size
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF5B6DF0),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 40),
-        // Display for scrambled letters (now using _availableScrambledChars)
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 12.0,
-          runSpacing: 12.0,
-          children: _availableScrambledChars.map((char) { // Use _availableScrambledChars
-            return Draggable<String>(
-              data: char,
-              feedback: Material(
-                color: Colors.transparent,
-                child: _buildLetterBox(char, isFeedback: true),
-              ),
-              childWhenDragging: const SizedBox.shrink(), // Use SizedBox.shrink() for placeholder
-              child: _buildLetterBox(char),
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 30),
-        if (_showFeedback)
-          Text(
-            _isCorrect ? 'Correct!' : 'Try Again!',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: _isCorrect ? Colors.greenAccent : Colors.redAccent,
-            ),
-          ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              icon: Icons.refresh,
-              label: 'Reset',
-              color: Colors.redAccent,
-              onTap: _resetAttempt,
-            ),
-            _buildActionButton(
-              icon: Icons.lightbulb_outline,
-              label: 'Hint (${_maxHints - _hintsUsed})', // Show remaining hints
-              color: (_maxHints - _hintsUsed) > 0 ? Colors.yellow.shade700 : Colors.grey, // Grey out if no hints left
-              onTap: (_maxHints - _hintsUsed) > 0 ? _getHint : null, // Disable if no hints left
-            ),
-            _buildActionButton(
-              icon: Icons.check_circle_outline,
-              label: 'Solve',
-              color: Colors.blueAccent,
-              onTap: _solveWord,
-            ),
-            // _buildActionButton(
-            //   icon: Icons.skip_next,
-            //   label: 'Skip',
-            //   color: Colors.purpleAccent,
-            //   onTap: (){
-            //    final currentWord = GameLevel.allLevels[_selectedLevel! - 1].words[_currentWordIndex];
-            // _showMessageDialog('Definition of "${currentWord.correctWord}"', currentWord.definition);
-            // Future.delayed(const Duration(seconds: 2), () { // Give time to read definition
-            //   _moveToNextWord();
-            // });},
-            // ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // Helper to build a letter box for draggable letters
-  Widget _buildLetterBox(String letter, {bool isFeedback = false, bool isDragging = false}) {
-    return Container(
-      width: isFeedback ? 50 : 60,
-      height: isFeedback ? 60 : 70,
-      decoration: BoxDecoration(
-        color: isFeedback
-            ? Colors.orangeAccent.withOpacity(0.8)
-            : (isDragging ? Colors.transparent : Colors.white.withOpacity(0.9)),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: isFeedback || isDragging
-            ? null
-            : [
+          padding: const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD4C7B7), // Light beige from UI image
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: const Color(0xFF8D7C6A), width: 2), // Darker beige border
+              boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
                   spreadRadius: 1,
@@ -642,56 +656,276 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
                   offset: const Offset(0, 3),
                 ),
               ],
-        border: Border.all(
-          color: isFeedback ? Colors.white : const Color(0xFFFF9F40),
-          width: 2,
+            ),
+            child: Text(
+              'LEVEL $_selectedLevel', // Re-added the level box
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF8B5A2B), // Dark brown text
+              ),
+            ),
+          ),
         ),
+
+        // Display for the words being formed by the user (target boxes)
+        Expanded(
+          child: SingleChildScrollView( // Allow scrolling if many words
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: List.generate(currentLevelData.words.length, (wordIndex) {
+                final currentGameWord = currentLevelData.words[wordIndex];
+                final bool isWordCompleted = _matchedWords[wordIndex] != null; // Check if this specific row is matched
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 1.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: isWordCompleted
+                          ? Colors.green.shade100.withOpacity(0.8) // Light green if completed
+                          : const Color(0xFFFDF0D5), // Light yellow background for the main box
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: isWordCompleted
+                            ? Colors.green.shade700
+                            : const Color(0xFFD4C7B7), // Light beige border
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 5.0, // Smaller spacing between boxes
+                      runSpacing: 5.0, // Smaller spacing between lines
+                      children: List.generate(currentGameWord.correctWord.length, (letterIndex) {
+                        final String currentLetter = _currentAttempts[wordIndex][letterIndex];
+                        return DragTarget<String>(
+                          onWillAcceptWithDetails: (data) => !isWordCompleted, // Only accept if word not completed
+                          onAcceptWithDetails: (data) {
+                            if (!isWordCompleted) {
+                              _onLetterPlaced(data.data, wordIndex, letterIndex);
+                            }
+                          },
+                          builder: (context, candidateData, rejectedData) {
+                            return GestureDetector( // Make letter in attempt box tappable to return
+                              onTap: isWordCompleted ? null : () => _onLetterReturned(wordIndex, letterIndex),
+                              child: _buildAttemptLetterBox(
+                                currentLetter,
+                                wordIndex, // Pass wordIndex for feedback logic
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+
+        // Display for scrambled letters (draggable letters)
+        Container(
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFDF0D5), // Light yellow background for the main box
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFFD4C7B7), // Light beige border
+              width: 3,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8.0, // Smaller spacing for available letters
+            runSpacing: 8.0,
+            children: _availableScrambledChars.map((char) {
+              return Draggable<String>(
+                data: char,
+                feedback: Material(
+                  color: Colors.transparent,
+                  child: _buildLetterBox(char, isFeedback: true),
+                ),
+                childWhenDragging: _buildLetterBox(char, isDragging: true), // Show ghost when dragging
+                child: _buildLetterBox(char),
+              );
+            }).toList(),
+          ),
+        ),
+        // Action Buttons
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildActionButton(
+                icon: Icons.refresh,
+                label: 'RESET',
+                color: const Color(0xFFD4C7B7), // Match UI image button color
+                onTap: _resetAllWords, // Reset all words in the level
+              ),
+              _buildActionButton(
+                icon: Icons.lightbulb_outline,
+                label: 'HINT', // Label as per UI image
+                color: const Color(0xFFD4C7B7), // Match UI image button color
+                onTap: _getHint,
+              ),
+            ],
+          ),
+        ),
+        // Feedback message (optional, can be removed if not desired)
+        if (_showFeedback)
+          Text(
+            _isLastActionCorrect ? 'Correct!' : 'Try Again!',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: _isLastActionCorrect ? Colors.green.shade700 : Colors.red.shade700,
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Helper to build a letter box for draggable letters (bottom pool)
+  Widget _buildLetterBox(String letter, {bool isFeedback = false, bool isDragging = false}) {
+    return Container(
+      width: 45, // Smaller width
+      height: 45, // Smaller height
+      decoration: BoxDecoration(
+        color: isFeedback
+            ? const Color(0xFF8B5A2B).withOpacity(0.8)
+            : (isDragging ? Colors.transparent : const Color(0xFFD4C7B7)),
+        borderRadius: BorderRadius.circular(8), // Slightly smaller radius
+        border: Border.all(
+          color: isFeedback ? Colors.white : const Color(0xFF8D7C6A),
+          width: 1.5, // Slightly thinner border
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       alignment: Alignment.center,
       child: Text(
-        letter,
+        letter.toUpperCase(),
         style: TextStyle(
-          fontSize: isFeedback ? 30 : 36,
+          fontSize: 24, // Smaller font size
           fontWeight: FontWeight.bold,
-          color: isFeedback ? Colors.white : const Color(0xFF5B6DF0),
+          color: isFeedback ? Colors.white : const Color(0xFF8B5A2B),
         ),
       ),
     );
   }
 
-  // Helper to build action buttons (Reset, Hint, Solve, Skip)
+  // Helper to build a letter box for the attempt (top word slots)
+  Widget _buildAttemptLetterBox(String letter, int wordIndex) { // Removed showFeedback, isCorrect params
+    Color borderColor = const Color(0xFF8D7C6A);
+    Color bgColor = const Color(0xFFD4C7B7);
+    Color textColor = const Color(0xFF8B5A2B);
+
+    bool isWordCompleted = _matchedWords[wordIndex] != null;
+
+    if (isWordCompleted) {
+      borderColor = Colors.green.shade700;
+      bgColor = Colors.green.shade100;
+      textColor = Colors.green.shade900;
+    } else if (_currentAttempts[wordIndex].every((char) => char.isNotEmpty) && _showFeedback && !_isLastActionCorrect) {
+      // If the word row is full, and last action was incorrect, and this row is not matched
+      borderColor = Colors.red.shade700;
+      bgColor = Colors.red.shade100;
+      textColor = Colors.red.shade900;
+    } else if (letter.isEmpty) {
+      bgColor = const Color(0xFFD4C7B7).withOpacity(0.4);
+    }
+
+    return Container(
+      width: 45, // Smaller width
+      height: 45, // Smaller height
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8), // Slightly smaller radius
+        border: Border.all(
+          color: borderColor,
+          width: 1.5, // Slightly thinner border
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        letter.toUpperCase(),
+        style: TextStyle(
+          fontSize: 24, // Smaller font size
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  // Helper to build action buttons (Reset, Hint)
   Widget _buildActionButton({
     required IconData icon,
     required String label,
     required Color color,
-    VoidCallback? onTap, // Made onTap nullable
+    VoidCallback? onTap,
   }) {
     return InkWell(
-      onTap: onTap, // Use the provided onTap callback (can be null)
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Adjusted padding for more buttons
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(30),
+          color: const Color(0xFFD4C7B7),
+          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
           ],
+          border: Border.all(color: const Color(0xFF8D7C6A), width: 2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(width: 8),
+            Icon(icon, color: const Color(0xFF8B5A2B), size: 28),
+            const SizedBox(width: 10),
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16, // Adjusted font size for more buttons
+                color: Color(0xFF8B5A2B),
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
