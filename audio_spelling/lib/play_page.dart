@@ -3,22 +3,63 @@ import 'package:audio_spelling/pages/story_mode.dart';
 import 'package:audio_spelling/pages/timed_challenge.dart';
 import 'package:audio_spelling/pages/word_search.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 
-class PlayPage extends StatelessWidget {
+class PlayPage extends StatefulWidget {
   const PlayPage({super.key});
+
+  @override
+  State<PlayPage> createState() => _PlayPageState();
+}
+
+class _PlayPageState extends State<PlayPage> {
+  // State variables for settings
+  bool _isSoundEnabled = true;
+  bool _isMusicEnabled = true;
+  bool _areNotificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings(); // Load settings when the widget initializes
+  }
+
+  // Method to load settings from SharedPreferences
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
+      _isMusicEnabled = prefs.getBool('isMusicEnabled') ?? true;
+      _areNotificationsEnabled = prefs.getBool('areNotificationsEnabled') ?? true;
+    });
+  }
+
+  // Method to save settings to SharedPreferences
+  Future<void> _saveSetting(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF5B6DF0),
+        backgroundColor: const Color(0xFF5B6DF0),
         automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _showSettingsBottomSheet(context);
+            },
+            icon: const Icon(Icons.settings, color: Colors.white),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -67,11 +108,10 @@ class PlayPage extends StatelessWidget {
                           Icons.search,
                           const Color(0xFF4AC2D6),
                           () {
-                               Navigator.push(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const WordSearchGame(),
+                                builder: (context) => const WordSearchGame(),
                               ),
                             );
                           },
@@ -82,7 +122,7 @@ class PlayPage extends StatelessWidget {
                           Icons.timer_outlined,
                           const Color.fromARGB(255, 19, 184, 0),
                           () {
-                             Navigator.push(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
@@ -100,8 +140,7 @@ class PlayPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const StoryModeGame(),
+                                builder: (context) => const StoryModeGame(),
                               ),
                             );
                           },
@@ -134,8 +173,6 @@ class PlayPage extends StatelessWidget {
           children: [
             const Icon(Icons.book, color: Colors.white, size: 80),
             const SizedBox(height: 8),
-            // The image had a custom icon with a graduation hat. This is a placeholder.
-            // You can replace this with an Image.asset for a custom icon.
             Container(
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
@@ -160,8 +197,6 @@ class PlayPage extends StatelessWidget {
     return InkWell(
       onTap: () {
         onTap();
-        // Handle game mode selection
-        // For example: Navigator.push(context, MaterialPageRoute(builder: (_) => GameModeScreen(title)));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -195,4 +230,85 @@ class PlayPage extends StatelessWidget {
       ),
     );
   }
+
+  // Method to show settings bottom sheet
+  void _showSettingsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext bc) {
+        return StatefulBuilder( // Use StatefulBuilder to update the bottom sheet's state
+          builder: (BuildContext context, StateSetter setStateInsideBottomSheet) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    'Settings',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                  ),
+                  const Divider(height: 30, thickness: 1),
+                  SwitchListTile(
+                    title: const Text(
+                      'Sound Volume',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                    secondary: const Icon(Icons.volume_up, color: Color(0xFF5B6DF0)),
+                    value: _isSoundEnabled,
+                    onChanged: (bool value) {
+                      setStateInsideBottomSheet(() {
+                        _isSoundEnabled = value;
+                      });
+                      _saveSetting('isSoundEnabled', value);
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text(
+                      'Background Music',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                    secondary: const Icon(Icons.music_note, color: Color(0xFF5B6DF0)),
+                    value: _isMusicEnabled,
+                    onChanged: (bool value) {
+                      setStateInsideBottomSheet(() {
+                        _isMusicEnabled = value;
+                      });
+                      _saveSetting('isMusicEnabled', value);
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text(
+                      'Notifications',
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                    secondary: const Icon(Icons.notifications, color: Color(0xFF5B6DF0)),
+                    value: _areNotificationsEnabled,
+                    onChanged: (bool value) {
+                      setStateInsideBottomSheet(() {
+                        _areNotificationsEnabled = value;
+                      });
+                      _saveSetting('areNotificationsEnabled', value);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+  // Kept for reference if other non-switch options are added later
 }
