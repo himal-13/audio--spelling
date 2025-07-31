@@ -1,6 +1,6 @@
+import 'package:audio_spelling/pages/build_sentences.dart';
 import 'package:audio_spelling/pages/classic_spelling.dart';
 import 'package:audio_spelling/pages/story_mode.dart';
-import 'package:audio_spelling/pages/timed_challenge.dart';
 import 'package:audio_spelling/pages/word_search.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
@@ -46,12 +46,6 @@ class _PlayPageState extends State<PlayPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF5B6DF0),
         automaticallyImplyLeading: false,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back_ios),
-        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -118,15 +112,15 @@ class _PlayPageState extends State<PlayPage> {
                         ),
                         _buildGameModeButton(
                           context,
-                          'Timed Challenge',
-                          Icons.timer_outlined,
-                          const Color.fromARGB(255, 19, 184, 0),
+                          'Build Sentences',
+                          Icons.text_fields, // New icon for sentence building
+                          const Color.fromARGB(255, 19, 184, 0), // Keeping the same color
                           () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    const TimedSpellingChallenge(),
+                                    const BuildSentencesPage(), // Placeholder for new page
                               ),
                             );
                           },
