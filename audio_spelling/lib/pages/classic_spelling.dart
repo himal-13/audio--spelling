@@ -230,13 +230,6 @@ class _ClassicalSpellingGameState extends State<ClassicalSpellingGame> {
   }
 
   // Saves progress to SharedPreferences
-  void _saveProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Convert the set of completed levels to a list of strings for storage
-    await prefs.setStringList(
-        'classicalCompletedLevels', _completedLevels.map((e) => e.toString()).toList());
-    await prefs.setInt('classicalMaxUnlockedLevel', _maxUnlockedLevel);
-  }
 
   // Function to start a level
   void _startLevel(int levelNumber) {
