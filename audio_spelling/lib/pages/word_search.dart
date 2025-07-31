@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-// import 'package:shared_preferences/shared_preferences.dart'; // Uncomment for real persistence
+import 'package:shared_preferences/shared_preferences.dart'; // Uncommented for real persistence
 
 // New class to store a found word and its path
 class FoundWord {
@@ -83,31 +83,28 @@ class _WordSearchGameState extends State<WordSearchGame> {
     _loadProgress(); // Load saved progress when the widget initializes
   }
 
-  // Simulates loading progress from storage (e.g., SharedPreferences)
+  // Loads progress from SharedPreferences
   void _loadProgress() async {
-    // For actual persistence, uncomment the following:
-    // final prefs = await SharedPreferences.getInstance();
-    // setState(() {
-    //   _completedLevels = (prefs.getStringList('wordSearchCompletedLevels') ?? [])
-    //       .map(int.parse)
-    //       .toSet();
-    // });
-
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // For initial run, ensure at least level 1 is accessible.
-      // In a real app, you'd load from SharedPreferences.
+      // Retrieve the list of completed levels, default to empty list if not found
+      _completedLevels = (prefs.getStringList('wordSearchCompletedLevels') ?? [])
+          .map(int.parse) // Convert string back to int
+          .toSet(); // Convert list to set
+
+      // Ensure level 1 is always accessible if no levels are marked completed
       if (_completedLevels.isEmpty) {
         _completedLevels.add(0); // Add a dummy "level 0" to unlock level 1
       }
     });
   }
 
-  // Simulates saving progress to storage (e.g., SharedPreferences)
+  // Saves progress to SharedPreferences
   void _saveProgress() async {
-    // For actual persistence, uncomment the following:
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setStringList(
-    //     'wordSearchCompletedLevels', _completedLevels.map((e) => e.toString()).toList());
+    final prefs = await SharedPreferences.getInstance();
+    // Convert the set of completed levels to a list of strings for storage
+    await prefs.setStringList(
+        'wordSearchCompletedLevels', _completedLevels.map((e) => e.toString()).toList());
   }
 
   // New: Function to start a specific Word Search level
@@ -470,6 +467,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
             itemBuilder: (context, index) {
               final level = WordSearchLevel.allLevels[index];
               // Check if the previous level is completed to unlock this level
+              // Level 1 is unlocked if level 0 is in _completedLevels (which is added by default)
               final bool isLocked = !_completedLevels.contains(level.levelNumber - 1);
               final bool isCompleted = _completedLevels.contains(level.levelNumber);
 

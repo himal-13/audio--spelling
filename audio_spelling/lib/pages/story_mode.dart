@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:shared_preferences/shared_preferences.dart'; // Uncomment for real persistence
+import 'package:shared_preferences/shared_preferences.dart'; // Uncommented for real persistence
 
 // New: Define a complete Story Mode
 class StoryMode {
@@ -140,7 +140,7 @@ class StoryChapter {
   StoryChapter({
     required this.narrative,
     required this.correctWord,
-    required this.hintText,
+    this.hintText = '', // Provide a default empty string if not given
     this.imageUrl,
   });
 }
@@ -177,31 +177,28 @@ class _StoryModeGameState extends State<StoryModeGame> {
     super.dispose();
   }
 
-  // Simulates loading progress from storage (e.g., SharedPreferences)
+  // Loads progress from SharedPreferences
   void _loadProgress() async {
-    // For actual persistence, uncomment the following:
-    // final prefs = await SharedPreferences.getInstance();
-    // setState(() {
-    //   _completedStoryModes = (prefs.getStringList('storyModeCompletedLevels') ?? [])
-    //       .map(int.parse)
-    //       .toSet();
-    // });
-
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // For initial run, ensure at least level 1 is accessible.
-      // In a real app, you'd load from SharedPreferences.
+      // Retrieve the list of completed story modes, default to empty list if not found
+      _completedStoryModes = (prefs.getStringList('storyModeCompletedLevels') ?? [])
+          .map(int.parse) // Convert string back to int
+          .toSet(); // Convert list to set
+
+      // Ensure level 1 is always accessible if no levels are marked completed
       if (_completedStoryModes.isEmpty) {
         _completedStoryModes.add(0); // Add a dummy "level 0" to unlock level 1
       }
     });
   }
 
-  // Simulates saving progress to storage (e.g., SharedPreferences)
+  // Saves progress to SharedPreferences
   void _saveProgress() async {
-    // For actual persistence, uncomment the following:
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setStringList(
-    //     'storyModeCompletedLevels', _completedStoryModes.map((e) => e.toString()).toList());
+    final prefs = await SharedPreferences.getInstance();
+    // Convert the set of completed story modes to a list of strings for storage
+    await prefs.setStringList(
+        'storyModeCompletedLevels', _completedStoryModes.map((e) => e.toString()).toList());
   }
 
   // Function to start a specific Story Mode
@@ -368,6 +365,7 @@ class _StoryModeGameState extends State<StoryModeGame> {
             itemBuilder: (context, index) {
               final storyMode = StoryMode.allStoryModes[index];
               // Check if the previous story mode is completed to unlock this one
+              // Level 1 is unlocked if level 0 is in _completedStoryModes (which is added by default)
               final bool isLocked = !_completedStoryModes.contains(storyMode.levelNumber - 1);
               final bool isCompleted = _completedStoryModes.contains(storyMode.levelNumber);
 
