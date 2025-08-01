@@ -1,6 +1,6 @@
 import 'package:audio_spelling/pages/build_sentences.dart';
 import 'package:audio_spelling/pages/classic_spelling.dart';
-import 'package:audio_spelling/pages/story_mode.dart';
+import 'package:audio_spelling/pages/fill_the_blank.dart';
 import 'package:audio_spelling/pages/word_search.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
@@ -51,7 +51,7 @@ class _PlayPageState extends State<PlayPage> {
             onPressed: () {
               _showSettingsBottomSheet(context);
             },
-            icon: const Icon(Icons.settings, color: Colors.white),
+            icon: const Icon(Icons.settings, color: Colors.white, size: 35,),
           ),
         ],
       ),
@@ -127,14 +127,14 @@ class _PlayPageState extends State<PlayPage> {
                         ),
                         _buildGameModeButton(
                           context,
-                          'Story Mode',
-                          Icons.menu_book,
+                          'Fill the Blanks',
+                          Icons.format_align_left, // Icon for fill the blanks
                           const Color.fromARGB(255, 89, 0, 158),
                           () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const StoryModeGame(),
+                                builder: (context) => const FillTheBlankGamePage(),
                               ),
                             );
                           },
