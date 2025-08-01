@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:shared_preferences/shared_preferences.dart'; // Uncommented for real persistence
+import 'package:shared_preferences/shared_preferences.dart';
 
 // New class to store a found word and its path
 class FoundWord {
@@ -20,7 +20,7 @@ class FoundWord {
   int get hashCode => word.hashCode;
 }
 
-// New: Define a data structure for a Word Search game level
+// Define a data structure for a Word Search game level
 class WordSearchLevel {
   final int levelNumber;
   final int gridSize;
@@ -66,7 +66,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
   late List<String> _currentWordsToFind; // Words for the current level
 
   List<List<String>> _grid = [];
-  List<FoundWord> _foundWords = []; // Changed to store FoundWord objects
+  List<FoundWord> _foundWords = []; // Stores FoundWord objects
   List<Offset> _currentSelectionPath = []; // Stores grid coordinates of current selection
   Offset? _startSelection;
   Offset? _endSelection;
@@ -74,8 +74,9 @@ class _WordSearchGameState extends State<WordSearchGame> {
   // GlobalKey to get the RenderBox of the grid container
   final GlobalKey _gridContainerKey = GlobalKey();
 
-  // New: Set to store completed levels for Word Search
+  // Set to store completed levels for Word Search
   Set<int> _completedLevels = {};
+  int _maxUnlockedLevel = 1; // Tracks the highest level number unlocked
 
   @override
   void initState() {
@@ -92,9 +93,15 @@ class _WordSearchGameState extends State<WordSearchGame> {
           .map(int.parse) // Convert string back to int
           .toSet(); // Convert list to set
 
-      // Ensure level 1 is always accessible if no levels are marked completed
+      // Determine the max unlocked level
       if (_completedLevels.isEmpty) {
-        _completedLevels.add(0); // Add a dummy "level 0" to unlock level 1
+        _maxUnlockedLevel = 1; // Start with Level 1 unlocked
+      } else {
+        _maxUnlockedLevel = (_completedLevels.reduce(max) + 1); // Max completed + 1
+        // Ensure _maxUnlockedLevel does not exceed total levels + 1
+        if (_maxUnlockedLevel > WordSearchLevel.allLevels.length + 1) {
+          _maxUnlockedLevel = WordSearchLevel.allLevels.length + 1;
+        }
       }
     });
   }
@@ -107,13 +114,14 @@ class _WordSearchGameState extends State<WordSearchGame> {
         'wordSearchCompletedLevels', _completedLevels.map((e) => e.toString()).toList());
   }
 
-  // New: Function to start a specific Word Search level
+  // Function to start a specific Word Search level
   void _startLevel(int levelNumber) {
     final level = WordSearchLevel.allLevels.firstWhere((lvl) => lvl.levelNumber == levelNumber);
     setState(() {
       _selectedLevelNumber = levelNumber;
       _currentGridSize = level.gridSize;
       _currentWordsToFind = List.from(level.wordsToFind); // Make a mutable copy
+      _foundWords.clear(); // Clear found words for the new level
       _generateGrid(); // Generate grid for the selected level
     });
   }
@@ -328,12 +336,13 @@ class _WordSearchGameState extends State<WordSearchGame> {
     if (wordToMark != null) {
       setState(() {
         _foundWords.add(FoundWord(wordToMark!, List.from(_currentSelectionPath))); // Store path
-        _showFeedbackDialog('Word Found!', 'You found "$wordToMark"!');
 
         // Check if all words in the current level are found
         if (_foundWords.length == _currentWordsToFind.length) {
-          _completedLevels.add(_selectedLevelNumber!); // Mark current level as completed
-          _saveProgress(); // Save progress
+          if (!_completedLevels.contains(_selectedLevelNumber!)) {
+            _completedLevels.add(_selectedLevelNumber!); // Mark current level as completed
+            _saveProgress(); // Save progress
+          }
           _showCompletionDialog();
         }
       });
@@ -344,37 +353,25 @@ class _WordSearchGameState extends State<WordSearchGame> {
   }
 
   // Shows a feedback dialog
-  void _showFeedbackDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+ 
 
   // Shows a dialog when the level is completed
   void _showCompletionDialog() {
+    // Add the completed level to the set and save it before the dialog appears
+    if (!_completedLevels.contains(_selectedLevelNumber!)) {
+      _completedLevels.add(_selectedLevelNumber!);
+      _saveProgress(); // Ensure progress is saved
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: Colors.white,
-          title: const Text('Level Completed!', style: TextStyle(color: Color(0xFF4AC2D6), fontWeight: FontWeight.bold)),
-          content: Text('Congratulations! You finished Level $_selectedLevelNumber.', style: const TextStyle(color: Colors.black87)),
+          backgroundColor: const Color(0xFFF5E6CC), // Match UI image background
+          title: const Text('Level Completed!', style: TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold)),
+          content: Text('Congratulations! You finished Level $_selectedLevelNumber.', style: const TextStyle(color: Color(0xFF8B5A2B))),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -383,7 +380,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                   _selectedLevelNumber = null; // Go back to level selection
                 });
               },
-              child: const Text('Back to Levels', style: TextStyle(color: Color(0xFF4AC2D6), fontWeight: FontWeight.bold)),
+              child: const Text('Back to Levels', style: TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold)),
             ),
             if (_selectedLevelNumber! < WordSearchLevel.allLevels.length)
               TextButton(
@@ -391,7 +388,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                   Navigator.of(context).pop(); // Close dialog
                   _startLevel(_selectedLevelNumber! + 1); // Start next level
                 },
-                child: const Text('Next Level', style: TextStyle(color: Color(0xFFFF9F40), fontWeight: FontWeight.bold)),
+                child: const Text('Next Level', style: TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold)),
               ),
           ],
         );
@@ -402,58 +399,40 @@ class _WordSearchGameState extends State<WordSearchGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5E6CC), // Overall background color from UI image
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4AC2D6), // Matching Word Search button color
+        backgroundColor: const Color(0xFFF5E6CC),
+        elevation: 0, // No shadow
         title: Text(
-          _selectedLevelNumber == null ? 'Select Level' : 'Word Search Level $_selectedLevelNumber',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          _selectedLevelNumber == null ? 'Select Level' : 'Level $_selectedLevelNumber',
+          style: const TextStyle(color: Color(0xFF8B5A2B), fontWeight: FontWeight.bold, fontSize: 24),
         ),
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF8B5A2B)),
           onPressed: () {
             if (_selectedLevelNumber != null) {
               setState(() {
                 _selectedLevelNumber = null; // Go back to level selection
               });
             } else {
-              Navigator.pop(context); // Go back to PlayPage
+              Navigator.pop(context); // Go back
             }
           },
         ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF4AC2D6), Color(0xFF5B6DF0)], // Adjusted gradient
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: _selectedLevelNumber == null
-              ? _buildLevelSelection()
-              : _buildGamePlay(),
-        ),
+      body: SafeArea(
+        child: _selectedLevelNumber == null
+            ? _buildLevelSelection()
+            : _buildGamePlay(),
       ),
     );
   }
 
-  // New: Builds the level selection screen for Word Search
+  // Builds the level selection screen
   Widget _buildLevelSelection() {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Text(
-            'Choose Your Word Search Challenge',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -466,9 +445,8 @@ class _WordSearchGameState extends State<WordSearchGame> {
             itemCount: WordSearchLevel.allLevels.length,
             itemBuilder: (context, index) {
               final level = WordSearchLevel.allLevels[index];
-              // Check if the previous level is completed to unlock this level
-              // Level 1 is unlocked if level 0 is in _completedLevels (which is added by default)
-              final bool isLocked = !_completedLevels.contains(level.levelNumber - 1);
+              // Check if the level is locked based on _maxUnlockedLevel
+              final bool isLocked = level.levelNumber > _maxUnlockedLevel;
               final bool isCompleted = _completedLevels.contains(level.levelNumber);
 
               return _buildLevelButton(level.levelNumber, isLocked, isCompleted);
@@ -479,15 +457,15 @@ class _WordSearchGameState extends State<WordSearchGame> {
     );
   }
 
-  // New: Builds a single level button for Word Search
+  // Builds a single level button
   Widget _buildLevelButton(int levelNumber, bool isLocked, bool isCompleted) {
     return InkWell(
       onTap: isLocked ? null : () => _startLevel(levelNumber), // Disable tap if locked
       child: Container(
         decoration: BoxDecoration(
           color: isLocked
-              ? Colors.grey.withOpacity(0.6)
-              : (isCompleted ? Colors.green.withOpacity(0.9) : Colors.white.withOpacity(0.9)),
+              ? const Color(0xFFD4C7B7).withOpacity(0.6) // Lighter greyish-brown for locked
+              : (isCompleted ? const Color(0xFF8B5A2B) : const Color(0xFFFDF0D5)), // Dark brown for completed, light yellow for unlocked
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -499,8 +477,8 @@ class _WordSearchGameState extends State<WordSearchGame> {
           ],
           border: Border.all(
             color: isLocked
-                ? Colors.grey.shade700
-                : (isCompleted ? Colors.green.shade700 : const Color(0xFF4AC2D6)), // Adjusted border color
+                ? const Color(0xFF8D7C6A) // Darker border for locked
+                : (isCompleted ? const Color(0xFF5A3B1F) : const Color(0xFFD4C7B7)), // Darker brown for completed, light brown for unlocked
             width: 3,
           ),
         ),
@@ -508,15 +486,15 @@ class _WordSearchGameState extends State<WordSearchGame> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isLocked ? Icons.lock : (isCompleted ? Icons.check_circle : Icons.search), // Adjusted icon
+              isLocked ? Icons.lock : (isCompleted ? Icons.check_circle : Icons.search),
               size: 48,
-              color: isLocked ? Colors.white : (isCompleted ? Colors.white : const Color(0xFF4AC2D6)), // Adjusted icon color
+              color: isLocked ? const Color(0xFF8D7C6A) : (isCompleted ? Colors.white : const Color(0xFF8B5A2B)), // Icon color
             ),
             const SizedBox(height: 12),
             Text(
               'Level $levelNumber',
               style: TextStyle(
-                color: isLocked ? Colors.white : (isCompleted ? Colors.white : const Color(0xFF5B6DF0)),
+                color: isLocked ? const Color(0xFF8D7C6A) : (isCompleted ? Colors.white : const Color(0xFF8B5A2B)), // Text color
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -544,24 +522,24 @@ class _WordSearchGameState extends State<WordSearchGame> {
   Widget _buildGamePlay() {
     // Defensive checks for current level data
     if (_selectedLevelNumber == null || _currentWordsToFind.isEmpty) {
-      return const Center(child: Text("Error: Level data not loaded.", style: TextStyle(color: Colors.white)));
+      return const Center(child: Text("Error: Level data not loaded.", style: TextStyle(color: Colors.black87)));
     }
 
     return Column(
       children: [
+        // Word list to find
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
             'Find these words:',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withOpacity(0.9),
+              color: Color(0xFF8B5A2B),
             ),
             textAlign: TextAlign.center,
           ),
         ),
-        // Word list to find
         Expanded(
           flex: 1,
           child: GridView.builder(
@@ -579,18 +557,18 @@ class _WordSearchGameState extends State<WordSearchGame> {
               return Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isFound ? Colors.green.withOpacity(0.7) : Colors.white.withOpacity(0.2),
+                  color: isFound ? const Color(0xFF8B5A2B) : const Color(0xFFFDF0D5),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white.withOpacity(0.5)),
+                  border: Border.all(color: const Color(0xFF8D7C6A)),
                 ),
                 child: Text(
                   word,
                   style: TextStyle(
-                    color: isFound ? Colors.white : Colors.white,
+                    color: isFound ? Colors.white : const Color(0xFF8B5A2B),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     decoration: isFound ? TextDecoration.lineThrough : TextDecoration.none,
-                    decorationColor: Colors.white,
+                    decorationColor: isFound ? Colors.white : const Color(0xFF8B5A2B),
                     decorationThickness: 2,
                   ),
                 ),
@@ -637,16 +615,18 @@ class _WordSearchGameState extends State<WordSearchGame> {
                       return Container(
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? Colors.orange.withOpacity(0.6)
-                              : (isCellInFoundWord ? Colors.green.withOpacity(0.4) : Colors.white.withOpacity(0.1)),
+                              ? const Color(0xFF8B5A2B) // New selection color
+                              : (isCellInFoundWord ? Colors.green.shade700.withOpacity(0.4) : const Color(0xFFD4C7B7).withOpacity(0.4)),
                           borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: Colors.white.withOpacity(0.2)),
+                          border: Border.all(
+                            color: isCellInFoundWord ? Colors.green.shade900 : const Color(0xFF8D7C6A).withOpacity(0.2),
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           letter,
                           style: TextStyle(
-                            color: isSelected || isCellInFoundWord ? Colors.white : Colors.white.withOpacity(0.8),
+                            color: isSelected || isCellInFoundWord ? Colors.white : const Color(0xFF8B5A2B),
                             fontSize: cellSize * 0.5,
                             fontWeight: FontWeight.bold,
                           ),
@@ -664,13 +644,13 @@ class _WordSearchGameState extends State<WordSearchGame> {
           child: ElevatedButton(
             onPressed: _generateGrid,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF9F40),
+              backgroundColor: const Color(0xFF8B5A2B), // New button color
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               elevation: 5,
             ),
             child: const Text(
-              'New Puzzle', // Changed from New Game to New Puzzle
+              'Reset', // Changed from New Game to New Puzzle
               style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
