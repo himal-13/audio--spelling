@@ -1,4 +1,4 @@
-package com.example.audio_spelling
+package com.wordgame.wordora
 
 import io.flutter.embedding.android.FlutterActivity
 
